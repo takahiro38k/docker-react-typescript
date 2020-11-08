@@ -1,0 +1,36 @@
+# docker-composeのYAML定義の形式のversion。理由がない限り、最新のものを利用。
+# 参照
+# https://docs.docker.com/compose/compose-file/
+version: "3.7"
+# サービス名(コンテナ名)。複数作成できる。
+services:
+  # 任意のサービス名(コンテナ名)
+  node:
+    build:
+      # context(環境)。Dockerfileがあるdirを相対パスで指定。
+      context: .
+      # Dockerfile名を指定。file名がDockerfileであれば省略可。
+      # dockerfile: Dockerfile
+    # コンテナがポート待受などをしていなくても、コンテナ起動後にコンテナを起動させ続ける。
+    # ブラウザで変更を即反映させるために必要。
+    tty: true
+    # 環境変数を追加。
+    environment:
+      # keyに対するvalueを改行してlist化するには - を用いる。
+      # ==============================
+      # NODE_ENVにproduction(本番環境)を指定。開発環境ならdevelopment。
+      - NODE_ENV=production
+    # ローカルのディレクトリとコンテナのディレクトリをbind(結びつけ)する。
+    # bindによって、ローカルの変更がコンテナに自動反映される。
+    #   ローカル:コンテナ
+    volumes:
+      - ./:/usr/src/app
+    # コンテナ内で実行するコマンド。
+    # ==============================
+    # sh -c  => -c は cmdstring のこと。リダイレクション(入力先の変更)を保持して、
+    #   cmdをローカルではなくコンテナで実行するためのテクニック。
+    command: sh -c "cd sample_app && yarn start"
+    # 外部に対して公開するポート番号、およびポートフォワードの通信先。
+    ports:
+      # ホストの-ポート3000宛の通信を、コンテナ(のIP)の3000宛に転送(ポートフォワード)する。
+      - "3000:3000"
